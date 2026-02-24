@@ -32,7 +32,8 @@ import {
   Edit3,
   Flag,
   Shield,
-  Zap
+  Zap,
+  MessageSquare
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -83,7 +84,7 @@ const MATCHES = [
 
 export default function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [view, setView] = useState<'public' | 'dashboard' | 'article' | 'category' | 'search'>('public');
+  const [view, setView] = useState<'public' | 'dashboard' | 'article' | 'category' | 'search' | 'fan-zone' | 'predictions'>('public');
   const [selectedArticle, setSelectedArticle] = useState<any>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -94,6 +95,7 @@ export default function App() {
   const [categoryArticles, setCategoryArticles] = useState<any[]>([]);
   const [standings, setStandings] = useState<any[]>([]);
   const [matches, setMatches] = useState<any[]>([]);
+  const [predictions, setPredictions] = useState<Record<number, string>>({});
   const [loading, setLoading] = useState(true);
   const [categoryLoading, setCategoryLoading] = useState(false);
   const [isAddingArticle, setIsAddingArticle] = useState(false);
@@ -102,6 +104,10 @@ export default function App() {
   const [videoUrl, setVideoUrl] = useState('https://www.youtube.com/embed/dQw4w9WgXcQ');
   const [isEditingVideo, setIsEditingVideo] = useState(false);
   const [tempVideoUrl, setTempVideoUrl] = useState('');
+
+  const handlePrediction = (matchId: number, result: string) => {
+    setPredictions(prev => ({ ...prev, [matchId]: result }));
+  };
 
   const DEFAULT_IMAGE = "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&q=80&w=1200";
 
@@ -566,6 +572,19 @@ export default function App() {
                   {link.name}
                 </button>
               ))}
+              <div className="h-4 w-px bg-neutral-200 mx-2"></div>
+              <button 
+                onClick={() => setView('fan-zone')}
+                className={`text-xs font-bold flex items-center gap-1.5 uppercase tracking-wider transition-colors ${view === 'fan-zone' ? 'text-emerald-600' : 'text-neutral-500 hover:text-emerald-600'}`}
+              >
+                <Users className="w-3.5 h-3.5" /> Fan Zone
+              </button>
+              <button 
+                onClick={() => setView('predictions')}
+                className={`text-xs font-bold flex items-center gap-1.5 uppercase tracking-wider transition-colors ${view === 'predictions' ? 'text-emerald-600' : 'text-neutral-500 hover:text-emerald-600'}`}
+              >
+                <Zap className="w-3.5 h-3.5" /> Pronostici
+              </button>
             </nav>
 
             {/* Search & Mobile Menu Toggle */}
@@ -624,6 +643,19 @@ export default function App() {
                     {link.name}
                   </button>
                 ))}
+                <div className="h-px bg-neutral-100 my-4"></div>
+                <button 
+                  onClick={() => { setView('fan-zone'); setIsMenuOpen(false); }}
+                  className="w-full flex items-center gap-4 text-lg font-medium text-neutral-700 hover:text-emerald-600"
+                >
+                  <Users className="w-5 h-5" /> Fan Zone
+                </button>
+                <button 
+                  onClick={() => { setView('predictions'); setIsMenuOpen(false); }}
+                  className="w-full flex items-center gap-4 text-lg font-medium text-neutral-700 hover:text-emerald-600"
+                >
+                  <Zap className="w-5 h-5" /> Pronostici
+                </button>
                 <button 
                   onClick={() => { setView('dashboard'); setIsMenuOpen(false); }}
                   className="w-full flex items-center gap-4 text-lg font-medium text-emerald-600 pt-4 border-t border-neutral-100"
@@ -824,6 +856,211 @@ export default function App() {
                   <button className="w-full py-2 bg-emerald-600 text-white text-xs font-bold rounded-lg hover:bg-emerald-700 transition-colors">
                     Scopri di più
                   </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {view === 'fan-zone' && (
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div className="text-center mb-16">
+              <span className="text-emerald-600 font-bold uppercase tracking-widest text-sm mb-4 block">Community</span>
+              <h1 className="text-5xl font-display font-extrabold text-neutral-900 mb-6">Fan Zone</h1>
+              <p className="text-neutral-500 max-w-2xl mx-auto text-lg">
+                Il cuore pulsante di Mondo Calcio. Unisciti alla discussione, partecipa ai sondaggi e condividi la tua passione.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2 space-y-8">
+                {/* Fan Wall */}
+                <div className="bg-white rounded-3xl p-8 shadow-sm border border-neutral-100">
+                  <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
+                    <MessageSquare className="w-6 h-6 text-emerald-600" />
+                    Fan Wall
+                  </h2>
+                  <div className="space-y-6">
+                    {[
+                      { user: "Marco88", text: "Che partita ieri sera! La Serie A non è mai stata così equilibrata.", time: "10 min fa", avatar: "M" },
+                      { user: "Giulia_Inter", text: "Speriamo bene per il derby, la tensione è alle stelle!", time: "45 min fa", avatar: "G" },
+                      { user: "Luca_Juve", text: "Il mercato di gennaio sarà decisivo per la rincorsa Champions.", time: "2 ore fa", avatar: "L" },
+                    ].map((msg, i) => (
+                      <div key={i} className="flex gap-4 p-4 bg-neutral-50 rounded-2xl">
+                        <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold">
+                          {msg.avatar}
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-bold text-neutral-900">{msg.user}</span>
+                            <span className="text-[10px] text-neutral-400">{msg.time}</span>
+                          </div>
+                          <p className="text-sm text-neutral-600">{msg.text}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-8 pt-8 border-t border-neutral-100">
+                    <textarea 
+                      placeholder="Scrivi qualcosa sulla bacheca..."
+                      className="w-full p-4 bg-neutral-50 rounded-2xl border-none focus:ring-2 focus:ring-emerald-500/20 outline-none resize-none h-24 text-sm"
+                    ></textarea>
+                    <button className="mt-4 px-6 py-2 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-colors">
+                      Pubblica
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-8">
+                {/* Poll Section */}
+                <div className="bg-emerald-900 rounded-3xl p-8 text-white shadow-xl">
+                  <h3 className="text-xl font-bold mb-6 flex items-center gap-3">
+                    <BarChart3 className="w-6 h-6 text-emerald-400" />
+                    Sondaggio
+                  </h3>
+                  <p className="text-emerald-100 font-medium mb-6">Chi vincerà lo scudetto quest'anno?</p>
+                  <div className="space-y-3">
+                    {[
+                      { team: "Inter", votes: 45 },
+                      { team: "Juventus", votes: 30 },
+                      { team: "Milan", votes: 15 },
+                      { team: "Napoli", votes: 10 },
+                    ].map((option, i) => (
+                      <button key={i} className="w-full group">
+                        <div className="flex justify-between text-xs mb-1 font-bold">
+                          <span>{option.team}</span>
+                          <span>{option.votes}%</span>
+                        </div>
+                        <div className="h-2 bg-emerald-800 rounded-full overflow-hidden">
+                          <motion.div 
+                            initial={{ width: 0 }}
+                            animate={{ width: `${option.votes}%` }}
+                            className="h-full bg-emerald-400"
+                          />
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Top Fans */}
+                <div className="bg-white rounded-3xl p-8 shadow-sm border border-neutral-100">
+                  <h3 className="text-xl font-bold mb-6 flex items-center gap-3">
+                    <Trophy className="w-6 h-6 text-emerald-600" />
+                    Top Fans
+                  </h3>
+                  <div className="space-y-4">
+                    {[
+                      { name: "Francesco T.", points: 1250, rank: 1 },
+                      { name: "Alessio B.", points: 1100, rank: 2 },
+                      { name: "Sofia R.", points: 980, rank: 3 },
+                    ].map((fan, i) => (
+                      <div key={i} className="flex items-center justify-between p-3 bg-neutral-50 rounded-xl">
+                        <div className="flex items-center gap-3">
+                          <span className="text-xs font-bold text-neutral-400 w-4">#{fan.rank}</span>
+                          <span className="text-sm font-bold text-neutral-900">{fan.name}</span>
+                        </div>
+                        <span className="text-xs font-bold text-emerald-600">{fan.points} pt</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {view === 'predictions' && (
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div className="text-center mb-16">
+              <span className="text-emerald-600 font-bold uppercase tracking-widest text-sm mb-4 block">Sfida</span>
+              <h1 className="text-5xl font-display font-extrabold text-neutral-900 mb-6">Pronostici</h1>
+              <p className="text-neutral-500 max-w-2xl mx-auto text-lg">
+                Metti alla prova la tua conoscenza calcistica. Indovina i risultati delle partite e scala la classifica globale.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+              <div className="lg:col-span-2 space-y-6">
+                <h2 className="text-2xl font-bold text-neutral-900 mb-8 flex items-center gap-3">
+                  <Zap className="w-6 h-6 text-emerald-600" />
+                  Partite di Oggi
+                </h2>
+                
+                {matches.length > 0 ? matches.map((match, i) => (
+                  <div key={i} className="bg-white rounded-[2rem] p-8 shadow-sm border border-neutral-100 hover:shadow-md transition-all">
+                    <div className="flex justify-between items-center mb-8">
+                      <span className="px-3 py-1 bg-neutral-100 text-neutral-500 text-[10px] font-bold rounded-full uppercase tracking-widest">
+                        {match.league}
+                      </span>
+                      <span className="text-xs font-bold text-red-500 flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></span>
+                        {match.status}
+                      </span>
+                    </div>
+                    
+                    <div className="grid grid-cols-3 items-center gap-4 mb-8">
+                      <div className="text-center">
+                        <div className="w-16 h-16 bg-neutral-50 rounded-2xl mx-auto mb-3 flex items-center justify-center">
+                          <Shield className="w-8 h-8 text-neutral-300" />
+                        </div>
+                        <p className="font-bold text-neutral-900">{match.home}</p>
+                      </div>
+                      <div className="text-center">
+                        <span className="text-3xl font-display font-black text-neutral-900">{match.score}</span>
+                      </div>
+                      <div className="text-center">
+                        <div className="w-16 h-16 bg-neutral-50 rounded-2xl mx-auto mb-3 flex items-center justify-center">
+                          <Shield className="w-8 h-8 text-neutral-300" />
+                        </div>
+                        <p className="font-bold text-neutral-900">{match.away}</p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-3">
+                      {['1', 'X', '2'].map((res) => (
+                        <button 
+                          key={res}
+                          onClick={() => handlePrediction(i, res)}
+                          className={`py-3 rounded-xl font-bold text-sm transition-all ${
+                            predictions[i] === res 
+                              ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20' 
+                              : 'bg-neutral-50 text-neutral-600 hover:bg-neutral-100'
+                          }`}
+                        >
+                          {res}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )) : (
+                  <div className="py-20 text-center bg-white rounded-3xl border border-dashed border-neutral-200">
+                    <p className="text-neutral-400 font-medium">Nessuna partita disponibile per i pronostici al momento.</p>
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-8">
+                <div className="bg-white rounded-3xl p-8 shadow-sm border border-neutral-100">
+                  <h3 className="text-xl font-bold mb-6">Come Funziona</h3>
+                  <ul className="space-y-4">
+                    {[
+                      { icon: Zap, title: "Scegli l'esito", desc: "Seleziona 1, X o 2 per ogni partita." },
+                      { icon: Trophy, title: "Guadagna punti", desc: "Ottieni 10 punti per ogni pronostico esatto." },
+                      { icon: Star, title: "Scala la vetta", desc: "Entra nella Top 10 dei fan mondiali." },
+                    ].map((step, i) => (
+                      <li key={i} className="flex gap-4">
+                        <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center flex-shrink-0">
+                          <step.icon className="w-5 h-5 text-emerald-600" />
+                        </div>
+                        <div>
+                          <p className="font-bold text-sm text-neutral-900">{step.title}</p>
+                          <p className="text-xs text-neutral-500">{step.desc}</p>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               </div>
             </div>
