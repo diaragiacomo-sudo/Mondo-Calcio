@@ -83,6 +83,16 @@ const MATCHES = [
   { id: 3, home: "Man City", away: "Liverpool", score: "1 - 1", status: "Intervallo", league: "Premier League" },
 ];
 
+const Logo = ({ className = "w-8 h-8" }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+    <circle cx="12" cy="12" r="10" className="fill-emerald-600" />
+    <path d="M12 2C10.011 2 8.182 2.806 6.858 4.108L9 7.5L6 10L3.108 8.858C2.406 9.782 2 10.844 2 12C2 13.156 2.406 14.218 3.108 15.142L6 14L9 16.5L6.858 19.892C8.182 21.194 10.011 22 12 22C13.989 22 15.818 21.194 17.142 19.892L15 16.5L18 14L20.892 15.142C21.594 14.218 22 13.156 22 12C22 10.844 21.594 9.782 20.892 8.858L18 10L15 7.5L17.142 4.108C15.818 2.806 13.989 2 12 2Z" className="fill-white/20" />
+    <path d="M12 8L10 12L12 16L14 12L12 8Z" className="fill-white" />
+    <path d="M12 2V5L15 7.5L18 5V2C16.2 1.2 13.8 1.2 12 2Z" className="fill-white/40" />
+    <path d="M12 22V19L9 16.5L6 19V22C7.8 22.8 10.2 22.8 12 22Z" className="fill-white/40" />
+  </svg>
+);
+
 export default function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [view, setView] = useState<'public' | 'dashboard' | 'article' | 'category' | 'search' | 'fan-zone' | 'predictions'>('public');
@@ -596,13 +606,11 @@ export default function App() {
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <div 
-              className="flex items-center gap-2 cursor-pointer"
+              className="flex items-center gap-2 cursor-pointer group"
               onClick={() => setView('public')}
             >
-              <div className="bg-emerald-600 p-1.5 rounded-lg">
-                <Trophy className="w-6 h-6 text-white" />
-              </div>
-              <span className="text-xl font-display font-extrabold tracking-tight text-emerald-900">
+              <Logo className="w-9 h-9 transition-transform duration-500 group-hover:rotate-[360deg]" />
+              <span className="text-xl font-display font-black tracking-tighter text-neutral-900">
                 MONDO<span className="text-emerald-600">CALCIO</span>
               </span>
             </div>
@@ -1444,11 +1452,12 @@ export default function App() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
             {/* Brand */}
             <div className="col-span-1 md:col-span-1">
-              <div className="flex items-center gap-2 mb-6">
-                <div className="bg-emerald-600 p-1.5 rounded-lg">
-                  <Trophy className="w-5 h-5 text-white" />
-                </div>
-                <span className="text-lg font-display font-extrabold tracking-tight text-white">
+              <div 
+                className="flex items-center gap-2 mb-6 cursor-pointer group"
+                onClick={() => setView('public')}
+              >
+                <Logo className="w-8 h-8 transition-transform duration-500 group-hover:rotate-[360deg]" />
+                <span className="text-lg font-display font-black tracking-tighter text-white">
                   MONDO<span className="text-emerald-600">CALCIO</span>
                 </span>
               </div>
