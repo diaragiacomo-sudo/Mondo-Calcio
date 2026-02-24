@@ -33,7 +33,8 @@ import {
   Flag,
   Shield,
   Zap,
-  MessageSquare
+  MessageSquare,
+  RefreshCw
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -95,18 +96,64 @@ export default function App() {
   const [categoryArticles, setCategoryArticles] = useState<any[]>([]);
   const [standings, setStandings] = useState<any[]>([]);
   const [matches, setMatches] = useState<any[]>([]);
-  const [predictions, setPredictions] = useState<Record<number, string>>({});
   const [loading, setLoading] = useState(true);
   const [categoryLoading, setCategoryLoading] = useState(false);
   const [isAddingArticle, setIsAddingArticle] = useState(false);
   const [editingArticleId, setEditingArticleId] = useState<number | null>(null);
   const [newArticle, setNewArticle] = useState({ title: '', category: 'Serie A', summary: '', image: '' });
-  const [videoUrl, setVideoUrl] = useState('https://www.youtube.com/embed/dQw4w9WgXcQ');
+  const [videoUrl, setVideoUrl] = useState(() => {
+    return localStorage.getItem('mondocalcio_video_url') || 'https://www.youtube.com/embed/dQw4w9WgXcQ';
+  });
   const [isEditingVideo, setIsEditingVideo] = useState(false);
   const [tempVideoUrl, setTempVideoUrl] = useState('');
 
+  useEffect(() => {
+    localStorage.setItem('mondocalcio_video_url', videoUrl);
+  }, [videoUrl]);
+
+  const [predictions, setPredictions] = useState<Record<number, string>>(() => {
+    const saved = localStorage.getItem('mondocalcio_predictions');
+    return saved ? JSON.parse(saved) : {};
+  });
+
+  useEffect(() => {
+    localStorage.setItem('mondocalcio_predictions', JSON.stringify(predictions));
+  }, [predictions]);
+
   const handlePrediction = (matchId: number, result: string) => {
     setPredictions(prev => ({ ...prev, [matchId]: result }));
+  };
+
+  const convertToEmbedUrl = (url: string) => {
+    if (url.includes('youtube.com/embed/')) return url;
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const match = url.match(regExp);
+    if (match && match[2].length === 11) {
+      return `https://www.youtube.com/embed/${match[2]}`;
+    }
+    return url;
+  };
+
+  const refreshNews = async () => {
+    setLoading(true);
+    try {
+      const [realNews, realScores] = await Promise.all([
+        fetchRealFootballNews(),
+        fetchLiveScores()
+      ]);
+      setArticles(realNews.map((n: any, i: number) => ({
+        ...n,
+        id: i,
+        image: n.image && n.image.startsWith('http') ? n.image : `https://images.unsplash.com/photo-${1574629810360 + i}-7efbbe195018?auto=format&fit=crop&q=80&w=800`,
+        status: 'Pubblicato',
+        views: Math.floor(Math.random() * 5000)
+      })));
+      setMatches(realScores);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const DEFAULT_IMAGE = "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&q=80&w=1200";
@@ -429,7 +476,7 @@ export default function App() {
                     Annulla
                   </button>
                   <button 
-                    onClick={() => { setVideoUrl(tempVideoUrl); setIsEditingVideo(false); }}
+                    onClick={() => { setVideoUrl(convertToEmbedUrl(tempVideoUrl)); setIsEditingVideo(false); }}
                     className="flex-1 py-2 bg-emerald-600 text-white rounded-xl font-bold"
                   >
                     Salva
@@ -589,6 +636,13 @@ export default function App() {
 
             {/* Search & Mobile Menu Toggle */}
             <div className="flex items-center gap-3">
+              <button 
+                onClick={refreshNews}
+                className="p-2 text-neutral-500 hover:bg-neutral-100 rounded-full transition-colors"
+                title="Aggiorna Notizie"
+              >
+                <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
+              </button>
               <div className={`relative transition-all duration-300 ${isSearchOpen ? 'w-48 md:w-64' : 'w-10'}`}>
                 <form onSubmit={handleSearch} className="flex items-center">
                   <input 
